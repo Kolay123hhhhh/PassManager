@@ -19,6 +19,14 @@ void print(std::string promt) {
     std::cout << promt << std::endl;
 }
 
+void check_sec() {
+    if (IsDebuggerPresent()) {
+        print("[ВЗЛОМ] ОБНАРУЖЕН ОТЛАДЧИК!,Доступ запрещен!");
+        Sleep(700);
+        exit(0);
+    }
+}
+
 void showmenu() {
     print("\n[+] ==== PASS MANAGER ====");
     print("[+] 1.Записать новый пароль");
@@ -38,13 +46,15 @@ std::string enc(std::string data,char key) {
     return output;
 }
 
-void add_to_db(std::string name,std::string pass) {
-    std::ofstream file("database.txt",std::ios::app);
+void add_to_db(std::string name,std::string login,std::string email,std::string pass) {
+    std::ofstream file("PassManager.exe:db",std::ios::app);
     if (file.is_open()) {
         char key = 35;
         std::string ENCpass = enc(pass,key);
 
         file << name << "\n";
+        file << login << "\n";
+        file << email << "\n";
         file << ENCpass << "\n";
         file.close();
         print("Данные успешно сохраненны!");
@@ -54,21 +64,26 @@ void add_to_db(std::string name,std::string pass) {
 }
 
 void find_pass(std::string target_name) {
-    std::ifstream file("database.txt");
-    std::string name, encpass;
+    std::ifstream file("PassManager.exe:db");
+    std::string name, login,email,encpass;
     char key= 35;
     bool found = false;
     if (!file.is_open()) {
-        print("database.txt не найден!");
+        print("Поток с базой данных не найден");
         return;
     }
 
-    while (std::getline(file,name) && std::getline(file,encpass)) {
+    while (std::getline(file,name) && std::getline(file,login) && std::getline(file,email) && std::getline(file,encpass)) {
         if (name == target_name) {
             std::string dec = enc(encpass,key);
             print("[РЕЗУЛЬТАТ]");
             print("Сервис: " + name);
+            print("Логин: " + login);
+            print("Почта: " + email);
             print("Пароль: " + dec);
+
+            dec.assign(dec.size(), '\0');
+
             found = true;
             break;
         }
@@ -80,7 +95,7 @@ void find_pass(std::string target_name) {
 }
 
 void clear_db() {
-    std::ofstream file("database.txt", std::ios::trunc);
+    std::ofstream file("PassManager.exe:db", std::ios::trunc);
     if (file.is_open()) {
         file.close();
         print("База данных полностью очищена!");
@@ -94,15 +109,21 @@ int main() {
     SetConsoleOutputCP(65001);
     std::string current_hwid = getHWID();
     std::string pass;
+    std::string login;
+    std::string email;
     std::string name;
     std::string choice;
+    BOOL isDebuggerPresent;
     char key = 35;
 
-    std::ifstream file("identity.dat");
+    CheckRemoteDebuggerPresent(GetCurrentProcess(), &isDebuggerPresent);
+
+    std::ifstream file("PassManager.exe:id");
     if (!file.is_open()) {
-        std::ofstream out("identity.dat");
+        std::ofstream out("PassManager.exe:id");
         out << current_hwid;
         out.close();
+
         print("Программа привязана к данному оборудованию");
     } else {
         std::string saved_enc_hwid;
@@ -121,18 +142,26 @@ int main() {
 
     while (true) {
 
+        check_sec();
+
+        if (isDebuggerPresent) {
+            exit(0);
+        }
+
         showmenu();
 
         choice = input("Выберите действие: ");
 
         if (choice == "1") {
             name = input("Название соцсети: ");
+            login = input("Ваш логин: ");
+            email = input("Ваша почта: ");
             pass = input("Ваш пароль: ");
 
             if (pass.empty() || name.empty()) {
                 print("Вы ничего не ввели!");
             }
-            add_to_db(name,pass);
+            add_to_db(name,login,email,pass);
             continue;
         }
         if (choice == "2") {
