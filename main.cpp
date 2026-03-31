@@ -2,6 +2,12 @@
 #include <iostream>
 #include <windows.h>
 
+std::string getHWID() {
+    DWORD hwid = 0;
+    GetVolumeInformationA("C:\\",NULL,0,&hwid,NULL,NULL,NULL,0);
+    return std::to_string(hwid);
+}
+
 std::string input(std::string promt) {
     std::string value;
     std::cout << promt;
@@ -18,7 +24,7 @@ void showmenu() {
     print("[+] 1.Записать новый пароль");
     print("[+] 2.Посмотреть пароль");
     print("[+] 3.Очистка базы данных");
-    print("[+] 4.Выход");
+    print("[+] 4.Выход\n");
 }
 
 std::string enc(std::string data,char key) {
@@ -86,9 +92,33 @@ void clear_db() {
 int main() {
     SetConsoleCP(65001);
     SetConsoleOutputCP(65001);
+    std::string current_hwid = getHWID();
     std::string pass;
     std::string name;
     std::string choice;
+    char key = 35;
+
+    std::ifstream file("identity.dat");
+    if (!file.is_open()) {
+        std::ofstream out("identity.dat");
+        out << current_hwid;
+        out.close();
+        print("Программа привязана к данному оборудованию");
+    } else {
+        std::string saved_enc_hwid;
+        file >> saved_enc_hwid;
+        file.close();
+
+        if (saved_enc_hwid != current_hwid) {
+            print(saved_enc_hwid);
+            print(current_hwid);
+            print("[ОШИБКА] Доступ запрещен!");
+            exit(0);
+        } else {
+            print("Доступ разрешен!");
+        }
+    }
+
     while (true) {
 
         showmenu();
