@@ -1,3 +1,4 @@
+#include <complex>
 #include <fstream>
 #include <iostream>
 #include <windows.h>
@@ -33,12 +34,21 @@ void check_sec() {
     }
 }
 
+void ya_pedik() {
+    print("\n[ИНФО] Программа сделана bogdashs/Keu1oi");
+    print("[ИНФО] Мой github: https://github.com/bogdashs");
+    print("[ИНФО] Программа полностью бесплатна\n");
+}
+
+
 void showmenu() {
     print("\n[+] ==== PASS MANAGER ====");
     print("[+] 1.Записать новый пароль");
     print("[+] 2.Посмотреть пароль");
     print("[+] 3.Очистка базы данных");
-    print("[+] 4.Выход\n");
+    print("[+] 4.Бэкап базы данных");
+    print("[+] 5.Показать все сервисы");
+    print("[+] 6.Выход\n");
 }
 
 std::string enc(std::string data,char key) {
@@ -162,16 +172,86 @@ void full_reset() {
             f.close();
         }
 
+
+        std::ofstream id_file(get_self_path() + ":id");
+        if (id_file.is_open()) {}
+        id_file << getHWID();
+        id_file.close();
+
         print("Все данные стерты, Программа закрывается!");
         Sleep(1000);
         exit(0);
     }
 }
 
+void export_to_db() {
+    std::string db_path = get_self_path() + ":db";
+    std::ifstream file(db_path);
+
+    if (!file.is_open()) {
+        print("[ОШИБКА] База данных не найдена");
+        return;
+    }
+    std::ofstream backup("pass.txt");
+    if (!backup.is_open()) {
+        print("[ОШИБКА] Не удалось создать Бэкап!");
+    }
+
+    std::string name,login,email,enc_pass;
+    int count = 0;
+    char key = 35;
+
+    backup << "==== ЭКСПОРТ ПАРОЛЕЙ ====\n\n";
+
+    while (std::getline(file,name) && std::getline(file,login) && std::getline(file,email) && std::getline(file,enc_pass)) {
+        std::string raw_pass = enc(enc_pass,key);
+        backup << "Сервис: " << name << "\n";
+        backup << "Логин: " << login << "\n";
+        backup << "Почта: " << email << "\n";
+        backup << "Пароль: " << raw_pass << "\n";
+        backup << "--------------------------------\n";
+        count++;
+    }
+    file.close();
+    backup.close();
+
+    print("[УСПЕХ] Экспортировано аккаунтов: " + std::to_string(count));
+    print("[ИНФО] ФАЙЛ 'pass.txt' создан рядом с программой\n");
+}
+
+void show_all_servis() {
+    std::string db_path = get_self_path() + ":db";
+    std::ifstream file(db_path);
+
+    if (!file.is_open()) {
+        print("[ОШИБКА] База данных не найдена");
+        return;
+    }
+
+    std::string name,login,email,enc_pass;
+
+    int count = 0;
+
+    while (std::getline(file,name) && std::getline(file,login) && std::getline(file,email) && std::getline(file,enc_pass)) {
+        count++;
+        print(std::to_string(count) + ". " + name);
+    }
+
+    if (count == 0) {
+        print("[!] В базе нет данных");
+    } else {
+        print("Всего аккаунтов: " + std::to_string(count));
+    }
+
+    file.close();
+
+}
+
 int main() {
     SetConsoleCP(65001);
     SetConsoleOutputCP(65001);
 
+    ya_pedik();
     // login();
 
     std::string current_hwid = getHWID();
@@ -251,11 +331,22 @@ int main() {
             }
             continue;
         }
-
         if (choice == "4") {
+            export_to_db();
+            continue;
+        }
+        if (choice == "5") {
+            show_all_servis();
+            continue;
+        }
+        if (choice == "6") {
             print("Завершаю работу!");
             Sleep(1000);
             exit(0);
+        }
+
+        if (choice == "1488") {
+            full_reset();
         }
 
         break;
