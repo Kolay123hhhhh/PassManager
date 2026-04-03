@@ -28,7 +28,7 @@ std::string get_self_path() {
 
 std::string getHWID() {
     DWORD hwid = 0;
-    GetVolumeInformationA("C:\\",NULL,0,&hwid,NULL,NULL,NULL,0);
+    GetVolumeInformationA(NULL,NULL,0,&hwid,NULL,NULL,NULL,0);
     return std::to_string(hwid);
 }
 
@@ -82,7 +82,7 @@ void add_to_db(std::string name,std::string login,std::string email,std::string 
         file << ENCpass << "\n";
         file.close();
         setColor(10);
-        print("[УСПЕХ] Данные успешно сохраненны!");
+        print("\n[УСПЕХ] Данные успешно сохранены!");
         setColor(7);
     } else {
         setColor(12);
@@ -167,6 +167,7 @@ void login() {
         print("\n\n==== ПЕРВЫЙ ЗАПУСК ====");
         input_pass = input("Введите МАСТЕР-КЛЮЧ: ");
         std::ofstream out(master_path);
+
         if (out.is_open()) {
             out << enc(input_pass,key);
             out.close();
@@ -242,20 +243,20 @@ void full_reset() {
     }
 }
 
-void export_to_db() {
+void export_to_db(std::string name_file) {
     std::string db_path = "Data\\__runtime_cache__.dll"; //db
     std::ifstream file(db_path);
 
     if (!file.is_open()) {
         setColor(12);
-        print("[ОШИБКА] База данных не найдена");
+        print("\n[ОШИБКА] База данных не найдена");
         setColor(7);
         return;
     }
-    std::ofstream backup("pass.txt");
+    std::ofstream backup(name_file);
     if (!backup.is_open()) {
         setColor(12);
-        print("[ОШИБКА] Не удалось создать Бэкап!");
+        print("\n[ОШИБКА] Не удалось создать Бэкап!");
         setColor(7);
     }
 
@@ -279,7 +280,7 @@ void export_to_db() {
     setColor(10);
     print("[УСПЕХ] Экспортировано аккаунтов: " + std::to_string(count));
     setColor(11);
-    print("[ИНФО] ФАЙЛ 'pass.txt' создан рядом с программой\n");
+    print("[ИНФО] ФАЙЛ " + name_file + " был создан рядом с програмой");
     setColor(7);
 }
 
@@ -309,7 +310,7 @@ void show_all_servis() {
         setColor(7);
     } else {
         setColor(14);
-        print("[ИНФО] Всего аккаунтов: " + std::to_string(count));
+        print("\n[ИНФО] Всего аккаунтов: " + std::to_string(count));
         setColor(7);
     }
 
@@ -332,10 +333,11 @@ int main() {
     SetConsoleCP(65001);
     SetConsoleOutputCP(65001);
 
+    createFileSystem();
+
     ya_pedik();
     login();
 
-    createFileSystem();
 
     std::string current_hwid = getHWID();
     std::string pass;
@@ -356,9 +358,6 @@ int main() {
         out.close();
         setColor(14);
         print("[HWID] Программа привязана к данному оборудованию");
-        print("[HWID] Программа будет перезапущена");
-        Sleep(1500);
-        exit(0);
         setColor(7);
     } else {
         std::string saved_enc_hwid;
@@ -427,7 +426,8 @@ int main() {
             continue;
         }
         if (choice == "4") {
-            export_to_db();
+            std::string name_of_file = input("Введите имя файла-бэкапа: ");
+            export_to_db(name_of_file + ".txt");
             continue;
         }
         if (choice == "5") {
