@@ -15,6 +15,14 @@ public:
     virtual void onAuthSuccess() {};
     virtual void onAuthFailure() {};
     virtual void onPreExit() {};
+    virtual std::string getMenuItemName() {
+        return "Неизвестный плагин";
+    };
+
+    virtual void onMenuSelected() {}
+
+    int pluginID = 0;
+    void setPluginID(int id) { pluginID = id; }
 
 
     virtual bool handleChoice(const std::string& choice) {

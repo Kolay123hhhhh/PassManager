@@ -412,7 +412,7 @@ int main() {
 
         showmenu();
 
-        choice = input("Выберите действие: ");
+        choice = input("\nВыберите действие: ");
         if (choice.empty()) {
             continue;
         }

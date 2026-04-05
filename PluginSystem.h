@@ -55,14 +55,20 @@ class PluginSystem {
 
             PluginManager* manager = createFunc();
             manager->onInit();
+
+            manager->setPluginID(plugins.size() + 7);
+
             plugins.push_back(manager);
             library.push_back(hModule);
         }
     }
 
     void showMenu() {
+        int currentIndex = 7;
         for (auto& plugin : plugins) {
-            plugin->onMenu();
+
+            std::cout << "[+] "<< currentIndex << "." << plugin->getMenuItemName() << std::endl;
+            currentIndex++;
         }
     }
 
@@ -73,11 +79,27 @@ class PluginSystem {
     }
 
     bool dispatchChoice(const std::string& choice) {
-        for (auto plugin : plugins) {
-            if (plugin->handleChoice(choice)) {
-                return true;
+        // for (auto plugin : plugins) {
+        //     if (plugin->handleChoice(choice)) {
+        //         return true;
+        //     }
+        // }
+        // return false;
+
+        try {
+            int userChoice = std::stoi(choice);
+            if (userChoice >= 7) {
+                int index = userChoice - 7;
+
+                if (index >= 0 && index < plugins.size()) {
+
+                    plugins[index]->onMenuSelected();
+
+                }
+
             }
-        }
+
+        } catch (const std::invalid_argument& e) {}
         return false;
     }
 
