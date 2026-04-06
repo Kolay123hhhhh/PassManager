@@ -351,6 +351,13 @@ void createFileSystem() {
     }
 }
 
+void createFile(std::string name_of_file) {
+    namespace fs = std::filesystem;
+
+    if (fs::create_directory(name_of_file));
+
+}
+
 
 int main() {
     SetConsoleCP(65001);
@@ -489,9 +496,9 @@ int main() {
             exit(0);
         }
 
-        if (choice == "1488") {
-            full_reset();
-        }
+        // if (choice == "1488") {
+        //     full_reset();
+        // }
 
         continue;
     }

@@ -12,6 +12,12 @@
 #include <filesystem>
 #include "utils.h"
 
+extern void add_to_db(std::string name,std::string login,std::string email,std::string pass);
+extern void clear_db();
+extern void find_pass(std::string target_mame);
+extern void export_to_db(std::string name_file);
+extern void createFile(std::string name_of_file);
+
 class PluginSystem {
     private:
     std::pmr::vector<PluginManager*> plugins;
@@ -96,6 +102,26 @@ class PluginSystem {
                     PluginManager::PluginAPI api;
 
                     plugins[index]->onMenuSelected(api);
+
+                    api.addPassword = [](std::string n,std::string l,std::string e,std::string p) {
+                        add_to_db(n,l,e,p);
+                    };
+
+                    api.clearDB = []() {
+                        clear_db();
+                    };
+
+                    api.findPass = [](std::string target_name) {
+                        find_pass(target_name);
+                    };
+
+                    api.exportDB = [](std::string file_name) {
+                        export_to_db(file_name);
+                    };
+
+                    api.createFile = [](std::string file_of_name) {
+                        createFile(file_of_name);
+                    };
 
                 }
 

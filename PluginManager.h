@@ -34,9 +34,16 @@ public:
         // std::string (*getDataPath)(std::string promt) = [](std::string promt) {
         //
         // };
+        void (*addPassword)(std::string name,std::string login,std::string email,std::string pass) = [](std::string name,std::string login,std::string email,std::string pass) {};
+        void (*clearDB)() = []() {};
+        void (*findPass)(std::string target_mame) = [](std::string target_mame) {};
+        void (*exportDB)(std::string name_file) = [](std::string name_file) {};
+        void (*createFile)(std::string name_of_file) = [](std::string name_of_file) {};
 
 
 
+        void (*cls)() = []() {system("cls");};
+        void (*pause)() = []() {system("pause");};
 
     };
 
@@ -56,8 +63,6 @@ public:
     virtual std::string getMenuItemName() {
         return "Неизвестный плагин";
     };
-
-
 
 
     virtual void onMenuSelected(PluginAPI api) {}
