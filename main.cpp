@@ -92,6 +92,9 @@ void add_to_db(std::string name,std::string login,std::string email,std::string 
         file << email << "\n";
         file << ENCpass << "\n";
         file.close();
+
+        pm.onbrodcastPasswordAdded(name,login,email,pass);
+
         setColor(10);
         print("\n[УСПЕХ] Данные успешно сохранены!");
         setColor(7);
@@ -101,6 +104,9 @@ void add_to_db(std::string name,std::string login,std::string email,std::string 
         setColor(7);
     }
 }
+
+
+
 
 void find_pass(std::string target_name) {
     std::ifstream file("Data\\__runtime_cache__.dll"); //db
@@ -146,6 +152,9 @@ void clear_db() {
         setColor(11);
         print("[ИНФО] База данных полностью очищена!");
         setColor(7);
+
+        pm.onbrodcastClearDB();
+
     } else {
         setColor(12);
         print("[ОШИБКА] Не удалось обнаружить базу данных!");
@@ -390,13 +399,20 @@ int main() {
             print(saved_enc_hwid);
             print(current_hwid);
             setColor(12);
-            print("[ОШИБКА] Доступ запрещен!");
+            print("[HWID] Доступ запрещен!");
             setColor(7);
+
+            pm.onbrodcastHwidFailure();
+
+            Sleep(1000);
             exit(0);
         } else {
             setColor(10);
             print("\n[HWID] Доступ разрешен!\n");
             setColor(7);
+
+            pm.onbrodcastHwidSuccess();
+
         }
     }
 

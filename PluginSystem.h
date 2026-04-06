@@ -93,7 +93,9 @@ class PluginSystem {
 
                 if (index >= 0 && index < plugins.size()) {
 
-                    plugins[index]->onMenuSelected();
+                    PluginManager::PluginAPI api;
+
+                    plugins[index]->onMenuSelected(api);
 
                 }
 
@@ -113,10 +115,43 @@ class PluginSystem {
         }
     }
 
+
+    void onbrodcastClearDB() {
+        for (auto* plugin : plugins) {
+            if (plugin) {
+                plugin->onClearDB();
+            }
+        }
+    }
+
     void onbrodcastAuthFailure() {
         for (auto* plugin : plugins) {
             if (plugin) {
                 plugin->onAuthSuccess();
+            }
+        }
+    }
+
+    void onbrodcastHwidSuccess() {
+        for (auto* plugin : plugins) {
+            if (plugin) {
+                plugin->onHwidSuccess();
+            }
+        }
+    }
+
+    void onbrodcastHwidFailure() {
+        for (auto* plugin : plugins) {
+            if (plugin) {
+                plugin->onHwidFailure();
+            }
+        }
+    }
+
+    void onbrodcastPasswordAdded(std::string name,std::string login,std::string email,std::string pass) {
+        for (auto* plugin : plugins) {
+            if (plugin) {
+                plugin->onPasswordAdded(name, login,email,pass);
             }
         }
     }
