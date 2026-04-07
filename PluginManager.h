@@ -10,6 +10,8 @@
 #include <string>
 #include <filesystem>
 #include <windows.h>
+#include <cstdlib>
+#include <functional>
 
 class PluginManager {
 public:
@@ -44,6 +46,9 @@ public:
 
         void (*cls)() = []() {system("cls");};
         void (*pause)() = []() {system("pause");};
+        void (*onExit)() = []() { exit(0);};
+        // void (*selfUnload)() = []() {};
+        std::function<void()> selfUnload;
 
     };
 
@@ -65,7 +70,7 @@ public:
     };
 
 
-    virtual void onMenuSelected(PluginAPI api) {}
+    virtual void onMenuSelected(PluginAPI api) = 0;
 
     int pluginID = 0;
     void setPluginID(int id) { pluginID = id; }

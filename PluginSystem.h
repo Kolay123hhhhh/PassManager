@@ -12,17 +12,72 @@
 #include <filesystem>
 #include "utils.h"
 
+#include "SHA256.h"
+
 extern void add_to_db(std::string name,std::string login,std::string email,std::string pass);
 extern void clear_db();
 extern void find_pass(std::string target_mame);
 extern void export_to_db(std::string name_file);
 extern void createFile(std::string name_of_file);
 
+
+
 class PluginSystem {
     private:
     std::pmr::vector<PluginManager*> plugins;
     std::vector<HMODULE> library;
+
+    bool isApiEnabled = false;
+
+    std::string ya_gavnoed = "6767GAZANYEBANTIKTAKSTANDOFF2";
+
     public:
+
+    void loadSetting() {
+        std::ifstream file("Data\\runtime.cfg");
+        if (file.is_open()) {
+            int savedValue;
+            std::string savedHash;
+
+            if (file >> savedValue >> savedHash) {
+
+                std::string currentHash = sha256(std::to_string(savedValue) + ya_gavnoed);
+
+                if (currentHash == savedHash) {
+                    isApiEnabled = (bool)savedValue;
+                } else {
+                    isApiEnabled = false;
+                    print("[ИНФО] Файл настройки быд поврежден или изменен!");
+                }
+            }
+            file.close();
+        }
+    }
+
+
+    void saveSetting() {
+        std::ofstream file("Data\\runtime.cfg");
+        file << isApiEnabled << std::endl;
+
+        std::string SecretHash = std::to_string(isApiEnabled) + ya_gavnoed;
+
+        std::string getHash = sha256(SecretHash);
+
+        file << getHash << std::endl;
+
+        file.close();
+    }
+
+
+    void toggleAPI() {
+        isApiEnabled = !isApiEnabled;
+        saveSetting();
+    }
+
+    bool getApiStatus() {
+        return isApiEnabled;
+    }
+
 
     void loadPlugins(const std::string& folder_name) {
         namespace fs = std::filesystem;
@@ -70,6 +125,9 @@ class PluginSystem {
     }
 
     void showMenu() {
+
+        if (!getApiStatus()) return;
+
         int currentIndex = 7;
         for (auto& plugin : plugins) {
 
@@ -79,8 +137,28 @@ class PluginSystem {
     }
 
     void UpdateAll() {
+
+        if (!getApiStatus()) return;
+
         for (auto plugin : plugins) {
             plugin->onUpdate();
+        }
+    }
+
+    void unloadPlugin(int index) {
+        if (index >= 0 && index < plugins.size()) {
+
+            delete plugins[index];
+
+            plugins.erase(plugins.begin() + index);
+
+            if (library[index] != NULL) {
+                FreeLibrary(library[index]);
+                library.erase(library.begin() + index);
+            }
+
+            print("[ИНФО] Плагин выгружен");
+
         }
     }
 
@@ -99,9 +177,12 @@ class PluginSystem {
 
                 if (index >= 0 && index < plugins.size()) {
 
-                    PluginManager::PluginAPI api;
+                    if (!isApiEnabled) {
+                        print("[ИНФО] API выключено пользователем!");
+                        return false;
+                    }
 
-                    plugins[index]->onMenuSelected(api);
+                    PluginManager::PluginAPI api;
 
                     api.addPassword = [](std::string n,std::string l,std::string e,std::string p) {
                         add_to_db(n,l,e,p);
@@ -123,6 +204,13 @@ class PluginSystem {
                         createFile(file_of_name);
                     };
 
+                    api.selfUnload = [this, index]() {
+                        this->unloadPlugin(index);
+                    };
+
+                    plugins[index]->onMenuSelected(api);
+                    return true;
+
                 }
 
             }
@@ -131,9 +219,28 @@ class PluginSystem {
         return false;
     }
 
+    void unloadallPlugins() {
+        for (auto p : plugins) {
+            delete p;
+        }
 
+        plugins.clear();
+
+        for (HMODULE hmodule : library) {
+
+            if (hmodule != NULL) {
+                FreeLibrary(hmodule);
+            }
+
+        }
+        library.clear();
+
+        print("[ИНФО] Все плагины выгружены!");
+
+    }
 
     void onbrodcastAuthSuccess() {
+        if (!getApiStatus()) return;
         for (auto* plugin : plugins) {
             if (plugin) {
                 plugin->onAuthSuccess();
@@ -143,6 +250,7 @@ class PluginSystem {
 
 
     void onbrodcastClearDB() {
+        if (!getApiStatus()) return;
         for (auto* plugin : plugins) {
             if (plugin) {
                 plugin->onClearDB();
@@ -151,6 +259,7 @@ class PluginSystem {
     }
 
     void onbrodcastAuthFailure() {
+        if (!getApiStatus()) return;
         for (auto* plugin : plugins) {
             if (plugin) {
                 plugin->onAuthSuccess();
@@ -159,6 +268,7 @@ class PluginSystem {
     }
 
     void onbrodcastHwidSuccess() {
+        if (!getApiStatus()) return;
         for (auto* plugin : plugins) {
             if (plugin) {
                 plugin->onHwidSuccess();
@@ -167,6 +277,7 @@ class PluginSystem {
     }
 
     void onbrodcastHwidFailure() {
+        if (!getApiStatus()) return;
         for (auto* plugin : plugins) {
             if (plugin) {
                 plugin->onHwidFailure();
@@ -175,6 +286,7 @@ class PluginSystem {
     }
 
     void onbrodcastPasswordAdded(std::string name,std::string login,std::string email,std::string pass) {
+        if (!getApiStatus()) return;
         for (auto* plugin : plugins) {
             if (plugin) {
                 plugin->onPasswordAdded(name, login,email,pass);
@@ -183,6 +295,7 @@ class PluginSystem {
     }
 
     void onbrodcastExit() {
+        if (!getApiStatus()) return;
         for (auto* plugin : plugins) {
             plugin->onPreExit();
         }

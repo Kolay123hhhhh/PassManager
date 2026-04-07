@@ -7,6 +7,8 @@
 #include "SHA256.h"
 #include "PluginSystem.h"
 
+
+
 // master = master key
 // id = hwid pc
 // db = database password
@@ -64,11 +66,14 @@ void showmenu() {
     print("[+] 3.Очистка базы данных");
     print("[+] 4.Бэкап базы данных");
     print("[+] 5.Показать все сервисы");
-    print("[+] 6.Выход\n");
+    print("[+] 6.Переключить API");
+    print("[+] 7.Выход\n");
 
     if (pm.hasPlugins()) {
-        print("[+] ==== PLUGIN MENU ====");
-        pm.showMenu();
+        if (pm.getApiStatus() == TRUE) {
+            print("[+] ==== PLUGIN MENU ====");
+            pm.showMenu();
+        }
     }
 }
 
@@ -375,6 +380,8 @@ int main() {
     ya_pedik();
     login();
 
+    pm.loadSetting();
+
 
 
     std::string current_hwid = getHWID();
@@ -436,12 +443,14 @@ int main() {
         showmenu();
 
         choice = input("\nВыберите действие: ");
+
         if (choice.empty()) {
             continue;
         }
 
-
         if (pm.dispatchChoice(choice)) {
+            std::cin.clear();
+            std::fflush(stdin);
             continue;
         }
 
@@ -485,7 +494,25 @@ int main() {
             show_all_servis();
             continue;
         }
+
         if (choice == "6") {
+            setColor(12);
+            print("[ПРЕДУПРЕЖДЕНИЕ] Плагины смогут удалять/редактировать ваши пароли, скачивайте только проверенные!");
+            setColor(7);
+
+            std::string shoice = input("Вы хотите переключить статус API для плагинов (y/n): ");
+
+            if (shoice == "y" || shoice == "Y") {
+                pm.toggleAPI();
+                setColor(11);
+                print("[ИНФО] Статус API изменен на: " + std::string(pm.getApiStatus() ? "ВКЛ" : "Выкл"));
+                setColor(7);
+                continue;
+            }
+
+        }
+
+        if (choice == "7") {
             setColor(11);
             print("[ИНФО] Завершаю работу!");
             setColor(7);
