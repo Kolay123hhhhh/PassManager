@@ -47,7 +47,7 @@ class PluginSystem {
                     isApiEnabled = (bool)savedValue;
                 } else {
                     isApiEnabled = false;
-                    print("[ИНФО] Файл настройки быд поврежден или изменен!");
+                    print("[ИНФО] Файл настройки API был поврежден или изменен!");
                 }
             }
             file.close();

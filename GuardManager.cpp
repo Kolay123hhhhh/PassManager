@@ -15,6 +15,7 @@ int main() {
     std::string blacklist[] = {
         "Cheat Engine",
         "x64dbg",
+        "x32dbg",
     };
 
 

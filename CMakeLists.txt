@@ -4,9 +4,17 @@ project(PassManager)
 set(CMAKE_CXX_STANDARD 20)
 
 add_executable(PassManager main.cpp
+        UpdaterClass.cpp
+        UpdaterClass.h
+
+
 )
 
-add_executable(GuardManager GuardManager.cpp)
+add_executable(GuardManager GuardManager.cpp
+        UpdaterClass.cpp
+        UpdaterClass.h
+
+)
 
 add_library(utils utils.cpp utils.h)
 add_library(sha256 sha256-cpp-master/sha256-cpp/sha256-cpp.cpp
