@@ -12,10 +12,10 @@
 
 void UpdaterClass::checkUpdates() {
     std::string VersionGit_url = "https://raw.githubusercontent.com/bogdashs/PassManager/refs/heads/master/version.txt";
-    std::string DownloadGit_url = "https://github.com/bogdashs/PassManager/releases/latest/download/PassManager.exe";
+    std::string DownloadGit_url = "https://github.com/bogdashs/PassManager/releases/latest/download/PassManager-release.zip";
 
     std::string tempVersion = "Data\\check.tmp";
-    std::string tempDownload = "Data\\PassManager_new.exe";
+    std::string tempDownload = "Data\\PassManager_new.zip";
     setColor(11);
     print("[ИНФО] Проверка обновлений");
     setColor(7);
@@ -46,14 +46,14 @@ void UpdaterClass::checkUpdates() {
                     Sleep(2000);
                     setColor(7);
 
-                    std::string args = "PassManager.exe " + tempDownload;
+                    std::string args = "PassManager-release.zip " + tempDownload;
 
                     ShellExecuteA(NULL,"open","Updater.exe",args.c_str(),NULL,SW_SHOW);
 
                     exit(0);
 
                 } else {
-                    setColor(12);
+                    setColor(13);
                     print("[УСПЕХ]");
                     system("pause");
                     exit(0);

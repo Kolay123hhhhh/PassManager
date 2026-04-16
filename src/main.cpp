@@ -70,7 +70,8 @@ void showmenu() {
     print("[+] 4.Бэкап базы данных");
     print("[+] 5.Показать все сервисы");
     print("[+] 6.Переключить API");
-    print("[+] 7.Выход\n");
+    print("[+] 7.Настройки автозагрузки");
+    print("[+] 8.Выход\n");
 
     if (pm.hasPlugins()) {
         if (pm.getApiStatus() == TRUE) {
@@ -200,6 +201,7 @@ void login() {
             out << sha256(input_pass);
             out.close();
             setColor(10);
+            RunSetup::runSetup();
             print("[УСПЕХ] Программа будет перезапущена!");
             setColor(7);
             Sleep(600);
@@ -385,8 +387,6 @@ int main() {
 
     pm.loadSetting();
 
-    // RunSetup::runSetup();
-
     std::string current_hwid = getHWID();
     std::string pass;
     std::string login;
@@ -516,6 +516,35 @@ int main() {
         }
 
         if (choice == "7") {
+            bool autostart = RunSetup::isRun();
+
+            setColor(11);
+            print("\n[ИНФО] Автозагрузка: " + std::string(autostart ? "[ВКЛ]" : "[ВЫКЛ]"));
+            setColor(7);
+
+            std::string ZOV = input("Переключить авто загрузку? (y/n): ");
+
+            if (ZOV == "y" || ZOV == "Y") {
+
+                if (autostart) {
+                    RunSetup::runDelete();
+                    setColor(11);
+                    print("\n[ИНФО] Автозагрузка выключена");
+                    setColor(7);
+                } else {
+                    RunSetup::runSetup();
+                    setColor(11);
+                    print("\n[ИНФО] Автозагрузка включена");
+                    setColor(7);
+                }
+
+                continue;
+            }
+
+
+        }
+
+        if (choice == "8") {
             setColor(11);
             print("[ИНФО] Завершаю работу!");
             setColor(7);
@@ -525,10 +554,6 @@ int main() {
             Sleep(1000);
             exit(0);
         }
-
-        // if (choice == "1488") {
-        //     full_reset();
-        // }
 
         continue;
     }

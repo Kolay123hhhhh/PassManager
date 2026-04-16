@@ -9,7 +9,7 @@
 
 class UpdaterClass {
 
-    static inline const std::string CURRENT_VERSION = "1.0.0";
+    static inline const std::string CURRENT_VERSION = "1.0.1";
 public:
     static void checkUpdates();
 

@@ -9,6 +9,8 @@
 class RunSetup {
     public:
     static void runSetup();
+    static void runDelete();
+    static bool isRun();
 };
 
 

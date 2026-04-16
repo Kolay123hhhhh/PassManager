@@ -13,7 +13,7 @@ int main(int argc,char* argv[]) {
     }
 
     std::string OriginalExe = argv[1];
-    std::string DownloadExe = argv[2];
+    std::string DownloadZIP = argv[2];
 
     std::this_thread::sleep_for(std::chrono::seconds(3));
 
@@ -35,9 +35,25 @@ int main(int argc,char* argv[]) {
         return 1;
     }
 
-    if (MoveFileA(DownloadExe.c_str(), OriginalExe.c_str())) {
-        ShellExecuteA(NULL,"open",OriginalExe.c_str(),NULL,NULL,SW_SHOW);
+    std::string psCommand = "powershell -Command \"Expand-Archive -Path '" + DownloadZIP + "' -DestinationPath '.' -Force\"";
+
+    print("Unpacking Update...");
+
+    int res = system(psCommand.c_str());
+
+    if (res == 0) {
+        print("Unpacking finish!");
+
+        DeleteFileA(DownloadZIP.c_str());
+
+        ShellExecuteA(NULL, "open",OriginalExe.c_str(),NULL,NULL,SW_SHOW);
+
+        // if (MoveFileA(DownloadZIP.c_str(), OriginalExe.c_str())) {
+        //     ShellExecuteA(NULL,"open",OriginalExe.c_str(),NULL,NULL,SW_SHOW);
+        // } else {
+        //     print("Failed to move");
+        // }
     } else {
-        print("Failed to move");
+        print("Unpacking error!");
     }
 }

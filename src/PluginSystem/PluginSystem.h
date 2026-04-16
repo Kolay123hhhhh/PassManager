@@ -115,7 +115,7 @@ class PluginSystem {
             PluginManager* manager = createFunc();
             manager->onInit();
 
-            manager->setPluginID(plugins.size() + 7);
+            manager->setPluginID(plugins.size() + 9);
 
             plugins.push_back(manager);
             library.push_back(hModule);
@@ -126,7 +126,7 @@ class PluginSystem {
 
         if (!getApiStatus()) return;
 
-        int currentIndex = 7;
+        int currentIndex = 9;
         for (auto& plugin : plugins) {
 
             std::cout << "[+] "<< currentIndex << "." << plugin->getMenuItemName() << std::endl;
@@ -170,8 +170,8 @@ class PluginSystem {
 
         try {
             int userChoice = std::stoi(choice);
-            if (userChoice >= 7) {
-                int index = userChoice - 7;
+            if (userChoice >= 9) {
+                int index = userChoice - 9;
 
                 if (index >= 0 && index < plugins.size()) {
 
