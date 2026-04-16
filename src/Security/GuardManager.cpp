@@ -1,6 +1,6 @@
 #include <windows.h>
 #include <iostream>
-#include "../utils.h"
+#include "../Utils/utils.h"
 
 void hideconsole() {
     HWND console = GetConsoleWindow();

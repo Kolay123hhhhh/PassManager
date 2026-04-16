@@ -2,11 +2,12 @@
 #include <fstream>
 #include <iostream>
 #include <windows.h>
-#include "utils.h"
+#include "Utils/utils.h"
 #include <filesystem>
 #include "SHA256.h"
 #include "PluginSystem/PluginSystem.h"
 #include "UpdateSystem/UpdaterClass.h"
+#include "Security/RunSetup.h"
 
 
 
@@ -360,9 +361,7 @@ void createFileSystem() {
 
 void createFile(std::string name_of_file) {
     namespace fs = std::filesystem;
-
     if (fs::create_directory(name_of_file));
-
 }
 
 
@@ -386,7 +385,7 @@ int main() {
 
     pm.loadSetting();
 
-
+    // RunSetup::runSetup();
 
     std::string current_hwid = getHWID();
     std::string pass;

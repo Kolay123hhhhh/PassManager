@@ -10,7 +10,7 @@
 #include <windows.h>
 #include <string>
 #include <filesystem>
-#include "../utils.h"
+#include "../Utils/utils.h"
 
 #include "SHA256.h"
 
