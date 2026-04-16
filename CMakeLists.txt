@@ -27,6 +27,7 @@ add_library(sha256 src/external/sha256-cpp-master/sha256-cpp/sha256-cpp.cpp
         src/external/sha256-cpp-master/sha256-cpp/SHA256.h)
 
 target_link_libraries(PassManager utils)
+target_link_libraries(PassManager bcrypt)
 target_link_libraries(PassManager urlmon)
 target_link_libraries(GuardManager utils)
 target_link_libraries(Updater utils)

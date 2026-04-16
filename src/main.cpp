@@ -8,6 +8,8 @@
 #include "PluginSystem/PluginSystem.h"
 #include "UpdateSystem/UpdaterClass.h"
 #include "Security/RunSetup.h"
+#include <bcrypt.h>
+#pragma comment(lib, "bcrypt.lib")
 
 
 
@@ -171,16 +173,12 @@ void clear_db() {
     }
 }
 
-std::string generateSalt() {
-
-std::string goida = "_!@#$%^&())_+GOIDA6767676767767HDAWDUIGAFDFVIAWUFBGIABVIBVPIFBVPAIUBFV!^#&*(%#%^#$^&!$%#";
-
-    char computerName[MAX_COMPUTERNAME_LENGTH + 1];
-
-    DWORD size = sizeof(computerName);
-    GetComputerName(computerName, &size);
-
-    return getHWID() + "_" + std::string(computerName) + goida;
+std::string generateSalt(size_t length = 16) {
+    std::string salt(length, '\0');
+    if (BCryptGenRandom(NULL, (PUCHAR)salt.data(), length, BCRYPT_USE_SYSTEM_PREFERRED_RNG) != 0) {
+        throw std::runtime_error("[ОШИБКА] ");
+    }
+    return salt;
 }
 
 void login() {
