@@ -5,12 +5,14 @@
 #include <winternl.h>
 #include "Utils/utils.h"
 #include <filesystem>
+#include <thread>
+
 #include "SHA256.h"
 #include "PluginSystem/PluginSystem.h"
 #include "UpdateSystem/UpdaterClass.h"
 #include "Security/RunSetup.h"
 
-
+#define PANIC_HOTKEY_ID 1
 
 // master = master key
 // id = hwid pc
@@ -18,11 +20,41 @@
 // SHA256 library by https://github.com/kibonga/sha256-cpp?ysclid=mnjbap0dl3233927588
 // Project use GPL-3.0 license
 
+std::string session_key;
+
 PluginSystem pm;
 
-char generateXORKEY(std::string hwid) {
+void Panic(std::string &session_key) {
+
+    if (!RegisterHotKey(NULL,PANIC_HOTKEY_ID,MOD_ALT | MOD_SHIFT,0x58)) {
+        return;
+    }
+
+    MSG msg = {0};
+
+    while (GetMessage(&msg,NULL,0,0)) {
+        if (msg.message == WM_HOTKEY && msg.wParam == PANIC_HOTKEY_ID) {
+            session_key.assign(session_key.size(),'\0');
+
+            system("cls");
+
+            print("[ОШИБКА] Критическая ошибка: 342");
+
+            Sleep(2000);
+            exit(0);
+
+        }
+    }
+
+}
+
+char generateXORKEY(std::string hwid,std::string master_key) {
     char dynamicKey = 0;
-    for (char c :hwid) {
+    std:;string salt = hwid + master_key;
+
+    std::string goida = sha256(salt);
+
+    for (char c : goida) {
         dynamicKey ^= c;
     }
     if (dynamicKey == 0) {
@@ -94,7 +126,7 @@ void add_to_db(std::string name,std::string login,std::string email,std::string 
 
     std::ofstream file("Data\\__runtime_cache__.dll",std::ios::app); //db
     if (file.is_open()) {
-        char key = generateXORKEY(getHWID());
+        char key = generateXORKEY(getHWID(),session_key);
         std::string ENCpass = enc(pass,key);
 
         file << name << "\n";
@@ -121,7 +153,7 @@ void add_to_db(std::string name,std::string login,std::string email,std::string 
 void find_pass(std::string target_name) {
     std::ifstream file("Data\\__runtime_cache__.dll"); //db
     std::string name, login,email,encpass;
-    char key= generateXORKEY(getHWID());
+    char key= generateXORKEY(getHWID(),session_key);
     bool found = false;
     if (!file.is_open()) {
         setColor(12);
@@ -188,8 +220,8 @@ void login() {
     std::string master_path = "Data\\__libs__.master"; //master
     std::string db_path = "Data\\__runtime_cache__.dll"; //db
     std::string id_path = "Data\\assets_v2.bin"; //id
-    std::string saved_master,input_pass;
-    char key = generateXORKEY(getHWID());
+    std::string saved_master;
+    char key = generateXORKEY(getHWID(),session_key);
 
     std::ifstream check_file(master_path);
     std::ifstream check_file2(id_path);
@@ -207,13 +239,13 @@ void login() {
 
     if (!check_file.is_open()) {
         print("\n\n==== ПЕРВЫЙ ЗАПУСК ====");
-        input_pass = input("Введите МАСТЕР-КЛЮЧ: ");
+        session_key = input("Введите МАСТЕР-КЛЮЧ: ");
         std::ofstream out(master_path);
 
         ShellExecuteA(NULL,"open","https://github.com/bogdashs",NULL,NULL,SW_SHOWNORMAL);
 
         if (out.is_open()) {
-            out << sha256(input_pass + generateSalt());
+            out << sha256(session_key + generateSalt());
             out.close();
             setColor(10);
             RunSetup::runSetup();
@@ -238,9 +270,9 @@ void login() {
         while (true) {
             system("cls");
             print("\n==== ВХОД В СИСТЕМУ ====");
-            input_pass = input("Введите ваш МАСТЕР-КЛЮЧ: ");
+            session_key = input("Введите ваш МАСТЕР-КЛЮЧ: ");
 
-            if (sha256(input_pass + generateSalt()) == saved_master) {
+            if (sha256(session_key + generateSalt()) == saved_master) {
                 setColor(10);
                 print("\n[MASTER-KEY] ДОСТУП РАЗРЕШЕН\n");
                 setColor(7);
@@ -309,7 +341,7 @@ void export_to_db(std::string name_file) {
 
     std::string name,login,email,enc_pass;
     int count = 0;
-    char key = generateXORKEY(getHWID());
+    char key = generateXORKEY(getHWID(),session_key);
 
     backup << "==== ЭКСПОРТ ПАРОЛЕЙ ====\n\n";
 
@@ -419,6 +451,9 @@ int main() {
         return 0;
     }
 
+    std::thread panic(Panic,std::ref(session_key));
+    panic.detach();
+
     HWND hwnd = GetConsoleWindow();
 
     SetWindowDisplayAffinity(hwnd,WDA_EXCLUDEFROMCAPTURE);
@@ -448,7 +483,7 @@ int main() {
     std::string name;
     std::string choice;
     BOOL isDebuggerPresent;
-    char key = generateXORKEY(getHWID());
+    char key = generateXORKEY(getHWID(),session_key);
 
     CheckRemoteDebuggerPresent(GetCurrentProcess(), &isDebuggerPresent);
 
