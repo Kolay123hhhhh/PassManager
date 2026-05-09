@@ -6,7 +6,6 @@
 #include "Utils/utils.h"
 #include <filesystem>
 #include <thread>
-
 #include "SHA256.h"
 #include "PluginSystem/PluginSystem.h"
 #include "UpdateSystem/UpdaterClass.h"
@@ -48,13 +47,9 @@ void Panic(std::string &session_key) {
 
 }
 
-char generateXORKEY(std::string hwid,std::string master_key) {
+char generateXORKEY(std::string hwid) {
     char dynamicKey = 0;
-    std:;string salt = hwid + master_key;
-
-    std::string goida = sha256(salt);
-
-    for (char c : goida) {
+    for (char c : hwid) {
         dynamicKey ^= c;
     }
     if (dynamicKey == 0) {
@@ -126,7 +121,7 @@ void add_to_db(std::string name,std::string login,std::string email,std::string 
 
     std::ofstream file("Data\\__runtime_cache__.dll",std::ios::app); //db
     if (file.is_open()) {
-        char key = generateXORKEY(getHWID(),session_key);
+        char key = generateXORKEY(getHWID());
         std::string ENCpass = enc(pass,key);
 
         file << name << "\n";
@@ -153,7 +148,7 @@ void add_to_db(std::string name,std::string login,std::string email,std::string 
 void find_pass(std::string target_name) {
     std::ifstream file("Data\\__runtime_cache__.dll"); //db
     std::string name, login,email,encpass;
-    char key= generateXORKEY(getHWID(),session_key);
+    char key= generateXORKEY(getHWID());
     bool found = false;
     if (!file.is_open()) {
         setColor(12);
@@ -221,7 +216,7 @@ void login() {
     std::string db_path = "Data\\__runtime_cache__.dll"; //db
     std::string id_path = "Data\\assets_v2.bin"; //id
     std::string saved_master;
-    char key = generateXORKEY(getHWID(),session_key);
+    char key = generateXORKEY(getHWID());
 
     std::ifstream check_file(master_path);
     std::ifstream check_file2(id_path);
@@ -341,7 +336,7 @@ void export_to_db(std::string name_file) {
 
     std::string name,login,email,enc_pass;
     int count = 0;
-    char key = generateXORKEY(getHWID(),session_key);
+    char key = generateXORKEY(getHWID());
 
     backup << "==== ЭКСПОРТ ПАРОЛЕЙ ====\n\n";
 
@@ -483,7 +478,7 @@ int main() {
     std::string name;
     std::string choice;
     BOOL isDebuggerPresent;
-    char key = generateXORKEY(getHWID(),session_key);
+    char key = generateXORKEY(getHWID());
 
     CheckRemoteDebuggerPresent(GetCurrentProcess(), &isDebuggerPresent);
 
